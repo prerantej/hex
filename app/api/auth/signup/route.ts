@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../src/lib/db";
 import { z } from "zod";
-import bcrypt from "bcrypt";
+import { hash } from "bcryptjs";
 import { isAllowedDomain } from "../../../../src/lib/utils";
 import { rateLimit } from "../../../../src/lib/rate-limit";
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await hash(password, 10);
     const user = await prisma.user.create({
       data: { email: email.toLowerCase(), passwordHash, handle },
       select: { id: true, email: true, handle: true },

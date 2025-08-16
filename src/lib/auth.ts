@@ -1,6 +1,6 @@
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
+import { compare } from "bcryptjs";
 import { prisma } from "../lib/db";
 
 // Full NextAuth config
@@ -21,7 +21,7 @@ export const config = {
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return null;
 
-        const ok = await bcrypt.compare(String(creds.password), user.passwordHash);
+        const ok = await compare(String(creds.password), user.passwordHash);
         if (!ok) return null;
 
         // Return the minimal user object that becomes `user` in the JWT callback
