@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------
+   Design tokens (light/dark)
+----------------------------*/
+:root {
+  --bg: #f8fafc;       /* page background */
+  --card: #ffffff;     /* surfaces/cards */
+  --border: #e5e7eb;   /* subtle borders */
+  --text: #0f172a;     /* main text */
+  --muted: #64748b;    /* secondary text */
+}
+
+.dark {
+  --bg: #0b0f19;
+  --card: #111827;
+  --border: #1f2937;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+}
+
+/* Base layout */
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Container helper (pairs with Tailwind container config) */
+.container { @apply max-w-5xl mx-auto px-4; }
+
+/* ---------------------------
+   Primitives
+----------------------------*/
+.label        { @apply block text-sm mb-1 text-muted; }
+.input        { @apply w-full rounded-xl border border-border bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10; }
+.textarea     { @apply w-full rounded-xl border border-border bg-transparent px-3 py-2 outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10; }
+.badge        { @apply inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs text-muted; }
+
+/* Cards & buttons */
+.card         { @apply bg-card border border-border rounded-2xl shadow-soft; }
+
+.btn {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium
+         bg-black text-white hover:opacity-90 active:opacity-80
+         dark:bg-white dark:text-black transition;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-xl px-3 py-1.5 text-sm font-medium
+         border border-border bg-card hover:bg-white/60 dark:hover:bg-white/5 transition;
+}
+
+/* Links */
+a { @apply underline-offset-2 decoration-transparent hover:decoration-current; }
+
+/* ---------------------------
+   Utility color bindings
+----------------------------*/
+/* These map the CSS variables to Tailwind color names you used in config */
+.bg-card    { background-color: var(--card); }
+.bg-bg      { background-color: var(--bg); }
+.text-text  { color: var(--text); }
+.text-muted { color: var(--muted); }
+.border-border { border-color: var(--border); }
+
+/* Shadow used by cards (matches tailwind.config.js -> boxShadow.soft) */
+.shadow-soft { box-shadow: 0 2px 16px rgba(0, 0, 0, .06); }
+/* ---------- GLOBAL AUTO-STYLES (no page edits) ---------- */
+@layer base {
+  /* Typography */
+  h1 { @apply text-2xl font-semibold tracking-tight; }
+  h2 { @apply text-xl font-semibold tracking-tight; }
+  h3 { @apply text-lg font-medium; }
+  p  { @apply leading-relaxed; }
+  small, .muted { @apply text-muted; }
+
+  /* Links */
+  a { @apply underline-offset-2 decoration-transparent hover:decoration-current; }
+}
+
+@layer components {
+  /* Forms: style native inputs automatically */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  select,
+  textarea {
+    @apply w-full rounded-xl border border-border bg-transparent px-3 py-2 outline-none
+           focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10;
+  }
+
+  /* Buttons */
+  button:not(.btn,.btn-secondary) {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium
+           bg-black text-white hover:opacity-90 active:opacity-80
+           dark:bg-white dark:text-black transition;
+  }
+
+  /* Cards: common wrappers auto-get padding + style */
+  section.card, article.card, div.card {
+    @apply bg-card border border-border rounded-2xl shadow-soft p-4;
+  }
+
+  /* Lists of cards (grids) */
+  .card-grid { @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3; }
+}

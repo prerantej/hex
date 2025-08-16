@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  emailVerified        DateTime?
+  passwordHash         String
+  handle               String    @unique
+  name                 String?
+  year                 Int?
+  branch               String?
+  bio                  String?
+  skills               String[]
+  showHandleOnComments Boolean   @default(true)
+  role                 Role      @default(STUDENT)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  submissions Submission[]
+  comments    Comment[]
+  votes       Vote[]
+  saves       Save[]
+  auditLogs   AuditLog[]   @relation("UserAuditLogs")
+}
+
+model Company {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
+  submissions Submission[]
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  roleTitle   String?
+  ctc         String
+  location    String
+  difficulty  Int
+  journey     String
+  status      Status   @default(PENDING)
+  moderatorId String?
+  modNote     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isAnonymous Boolean  @default(true)
+
+  rounds   Round[]
+  tags     SubmissionTag[]
+  comments Comment[]
+  votes    Vote[]
+  saves    Save[]
+  reports  Report[]
+
+  @@index([status, createdAt])
+  @@index([companyId, status])
+}
+
+model Round {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  label        String
+  order        Int
+  date         DateTime?
+  result       String?
+}
+
+model Tag {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  type        String?
+  submissions SubmissionTag[]
+}
+
+model SubmissionTag {
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  tagId        String
+  tag          Tag        @relation(fields: [tagId], references: [id])
+
+  @@id([submissionId, tagId])
+}
+
+model Comment {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  parentId     String?
+  body         String
+  createdAt    DateTime   @default(now())
+  status       String     @default("visible")
+
+  @@index([submissionId])
+}
+
+model Vote {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  @@unique([submissionId, userId])
+  @@index([submissionId])
+}
+
+model Save {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  @@unique([submissionId, userId])
+  @@index([submissionId])
+}
+
+model Report {
+  id             String     @id @default(cuid())
+  submissionId   String
+  submission     Submission @relation(fields: [submissionId], references: [id])
+  reporterUserId String?
+  reason         String
+  createdAt      DateTime   @default(now())
+  resolvedAt     DateTime?
+
+  @@index([submissionId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String
+  actor       User     @relation("UserAuditLogs", fields: [actorUserId], references: [id])
+  action      String
+  targetType  String
+  targetId    String
+  meta        Json?
+  createdAt   DateTime @default(now())
+}
