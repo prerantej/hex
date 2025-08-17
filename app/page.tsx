@@ -3,16 +3,11 @@
 import useSWR from 'swr';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import type { Route } from 'next';
 
 const fetcher = async (u: string) => {
   const res = await fetch(u, { headers: { Accept: 'application/json' } });
-  // if API ever returns HTML on error, avoid .json() crash
-  try {
-    const json = await res.json();
-    return json;
-  } catch {
-    return { submissions: [] };
-  }
+  try { return await res.json(); } catch { return { submissions: [] }; }
 };
 
 export default function HomePage() {
@@ -31,12 +26,10 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      
-        <p className="text-lg text mt-2 text-center">
-          HEX is a campus-only platform where students anonymously share their placement &amp; interview journeys.
-          Browse approved experiences, filter by difficulty, and help peers by contributing your own.
-        </p>
-     
+      <p className="text-lg mt-2 text-center">
+        HEX is a campus-only platform where students anonymously share their placement &amp; interview journeys.
+        Browse approved experiences, filter by difficulty, and help peers by contributing your own.
+      </p>
 
       {/* Search panel */}
       <section className="card p-5 space-y-3">
@@ -82,10 +75,7 @@ export default function HomePage() {
         <h2 className="text-xl font-semibold tracking-tight">Recent approved submissions</h2>
 
         {isLoading && <p className="text-muted">Loading…</p>}
-
-        {!isLoading && submissions.length === 0 && (
-          <p className="text-muted">No submissions yet.</p>
-        )}
+        {!isLoading && submissions.length === 0 && <p className="text-muted">No submissions yet.</p>}
 
         <div className="space-y-3">
           {submissions.map((s: any) => {
@@ -102,17 +92,15 @@ export default function HomePage() {
                     .join(' → ')
                 : '';
 
+            // Build a CONCRETE href for App Router + typedRoutes
+            const href = (`/submissions/${encodeURIComponent(String(s.id))}`) as Route;
+
             return (
               <article key={s.id} className="card p-4">
                 <div className="flex justify-between">
                   <h3 className="font-medium">
-                    <Link
-                      // use the path that exists in your app: /submissions/[id] is common
-                      href={`/submissions/${s.id}`}
-                      className="hover:underline"
-                    >
-                      {companyName}
-                      {role}
+                    <Link href={href} className="hover:underline">
+                      {companyName}{role}
                     </Link>
                   </h3>
                   <div className="text-xs text-muted">{created}</div>
